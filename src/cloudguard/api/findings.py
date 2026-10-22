@@ -5,7 +5,16 @@ from sqlalchemy.orm import Session
 from cloudguard.core.database import get_db
 from cloudguard.models.finding import Finding
 from cloudguard.schemas.finding import FindingResponse
+from cloudguard.schemas.remediation import (
+    ApprovalRequest,
+    RemediationRequest,
+    RemediationResponse,
+)
 
+from cloudguard.services.remediation_service import (
+    approve_remediation,
+    request_remediation,
+)
 router = APIRouter(
     prefix="/api/v1/findings",
     tags=["Findings"],
@@ -55,3 +64,47 @@ def get_finding(
         )
 
     return finding
+
+@router.post(
+    "/{finding_id}/remediate",
+    response_model=RemediationResponse,
+)
+def remediate_finding(
+    finding_id: int,
+    request: RemediationRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+        return request_remediation(
+            db=db,
+            finding_id=finding_id,
+            requested_by=request.requested_by,
+        )
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(error),
+        ) from error
+
+@router.post(
+    "/{finding_id}/approve",
+    response_model=RemediationResponse,
+)
+def approve_finding_remediation(
+    finding_id: int,
+    request: ApprovalRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+        return approve_remediation(
+            db=db,
+            finding_id=finding_id,
+            approved_by=request.approved_by,
+        )
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(error),
+        ) from error
