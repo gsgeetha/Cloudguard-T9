@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: cloudguard-postgres
+
+    environment:
+      POSTGRES_DB: cloudguard
+      POSTGRES_USER: cloudguard
+      POSTGRES_PASSWORD: cloudguard
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - cloudguard_postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cloudguard -d cloudguard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  cloudguard_postgres_data:

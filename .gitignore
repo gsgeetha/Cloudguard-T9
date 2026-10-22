@@ -7,13 +7,14 @@ __pycache__/
 .ruff_cache/
 .coverage
 htmlcov/
+*.db
 
 # Virtual environment
 .venv/
 venv/
 
 # Environment variables and secrets
-.env.example
+.env
 *.pem
 *.key
 
