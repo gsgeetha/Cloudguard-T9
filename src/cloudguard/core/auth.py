@@ -9,7 +9,6 @@ from cloudguard.core.database import get_db
 from cloudguard.core.security import decode_access_token
 from cloudguard.models.user import User
 
-
 bearer_scheme = HTTPBearer()
 
 

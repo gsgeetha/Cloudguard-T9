@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import bcrypt
 from jose import JWTError, jwt
@@ -27,7 +27,7 @@ def create_access_token(
     username: str,
     role: str,
 ) -> str:
-    expires_at = datetime.now(timezone.utc) + timedelta(
+    expires_at = datetime.now(UTC) + timedelta(
         minutes=settings.access_token_expire_minutes
     )
 

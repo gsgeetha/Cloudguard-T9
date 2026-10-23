@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from cloudguard.core.auth import require_role
 from cloudguard.core.database import get_db
 from cloudguard.models.scan import Scan
+from cloudguard.models.user import User
 from cloudguard.schemas.scan import ScanCreate, ScanResponse
 from cloudguard.services.scan_service import run_scan
-from cloudguard.core.auth import require_role
-from cloudguard.models.user import User
 
 router = APIRouter(
     prefix="/api/v1/scans",

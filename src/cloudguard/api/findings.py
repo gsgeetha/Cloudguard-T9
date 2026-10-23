@@ -2,16 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from cloudguard.core.auth import require_role
 from cloudguard.core.database import get_db
 from cloudguard.models.finding import Finding
+from cloudguard.models.user import User
 from cloudguard.schemas.finding import FindingResponse
 from cloudguard.schemas.remediation import RemediationResponse
 from cloudguard.services.remediation_service import (
     approve_remediation,
     request_remediation,
 )
-from cloudguard.core.auth import require_role
-from cloudguard.models.user import User
+
 router = APIRouter(
     prefix="/api/v1/findings",
     tags=["Findings"],

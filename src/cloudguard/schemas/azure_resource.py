@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 
+
 class AzureSecurityRule(BaseModel):
     name: str
     direction: str

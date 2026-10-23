@@ -2,12 +2,11 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from cloudguard.core.auth import require_role
 from cloudguard.core.database import get_db
 from cloudguard.models.audit_log import AuditLog
-from cloudguard.schemas.audit_log import AuditLogResponse
-from cloudguard.core.auth import require_role
 from cloudguard.models.user import User
-
+from cloudguard.schemas.audit_log import AuditLogResponse
 
 router = APIRouter(
     prefix="/api/v1/audit-logs",

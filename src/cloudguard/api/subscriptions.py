@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from cloudguard.core.auth import require_role
 from cloudguard.core.database import get_db
 from cloudguard.models.subscription import Subscription
+from cloudguard.models.user import User
 from cloudguard.schemas.subscription import (
     SubscriptionCreate,
     SubscriptionResponse,
 )
-from cloudguard.core.auth import require_role
-from cloudguard.models.user import User
 
 router = APIRouter(
     prefix="/api/v1/subscriptions",

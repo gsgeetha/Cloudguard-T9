@@ -2,15 +2,15 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from cloudguard.core.auth import require_role
 from cloudguard.core.database import get_db
 from cloudguard.models.policy_rule import PolicyRule
+from cloudguard.models.user import User
 from cloudguard.schemas.policy_rule import (
     PolicyRuleCreate,
     PolicyRuleResponse,
 )
 from cloudguard.services.audit_service import create_audit_log
-from cloudguard.core.auth import require_role
-from cloudguard.models.user import User
 
 router = APIRouter(
     prefix="/api/v1/policies",

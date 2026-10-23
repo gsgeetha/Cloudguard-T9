@@ -1,6 +1,6 @@
+from cloudguard.azure.mock_inventory import load_mock_resources
 from cloudguard.policies.required_tag import evaluate_required_tag
 from cloudguard.schemas.azure_resource import AzureResource
-from cloudguard.azure.mock_inventory import load_mock_resources
 
 
 def test_compliant_resource_returns_no_violation() -> None:

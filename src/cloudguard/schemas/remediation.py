@@ -2,6 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+
 class RemediationResponse(BaseModel):
     id: int
     finding_id: int

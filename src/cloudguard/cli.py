@@ -1,11 +1,11 @@
 import typer
 from sqlalchemy import select
+
 from cloudguard.azure.mock_inventory import MockInventoryProvider
 from cloudguard.core.database import SessionLocal
-from cloudguard.services.scan_service import run_scan
 from cloudguard.models.finding import Finding
 from cloudguard.services.remediation_service import request_remediation
-
+from cloudguard.services.scan_service import run_scan
 
 app = typer.Typer(
     name="cloudguard",
@@ -16,7 +16,6 @@ app = typer.Typer(
 @app.callback()
 def main() -> None:
     """CloudGuard compliance and remediation CLI."""
-    pass
 
 
 @app.command()

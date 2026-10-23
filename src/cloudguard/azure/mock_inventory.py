@@ -1,9 +1,8 @@
 import json
 from pathlib import Path
 
-from cloudguard.schemas.azure_resource import AzureResource
 from cloudguard.azure.inventory import InventoryProvider
-
+from cloudguard.schemas.azure_resource import AzureResource
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 

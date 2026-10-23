@@ -5,7 +5,6 @@ from cloudguard.schemas.azure_resource import (
     AzureSecurityRule,
 )
 
-
 NSG_RESOURCE_TYPE = "Microsoft.Network/networkSecurityGroups"
 
 PUBLIC_SOURCE_PREFIXES = {

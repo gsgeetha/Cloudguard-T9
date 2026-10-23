@@ -31,3 +31,4 @@ dist/
 
 # Kubernetes local files
 *.kubeconfig
+k8s/secret.yaml

@@ -2,7 +2,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict
 
-
 UserRole = Literal[
     "admin",
     "cloud_engineer",
