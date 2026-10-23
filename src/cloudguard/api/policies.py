@@ -8,6 +8,7 @@ from cloudguard.schemas.policy_rule import (
     PolicyRuleCreate,
     PolicyRuleResponse,
 )
+from cloudguard.services.audit_service import create_audit_log
 
 router = APIRouter(
     prefix="/api/v1/policies",
@@ -37,6 +38,18 @@ def create_policy(
     db_policy = PolicyRule(**policy.model_dump())
 
     db.add(db_policy)
+    db.flush()
+
+    create_audit_log(
+        db,
+        event_type="policy_created",
+        entity_type="policy",
+        entity_id=db_policy.id,
+        actor="system",
+        action="create_policy",
+        details=f"Policy '{db_policy.name}' created",
+    )
+
     db.commit()
     db.refresh(db_policy)
 

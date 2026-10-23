@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from cloudguard.models.finding import Finding
 from cloudguard.models.policy_rule import PolicyRule
 from cloudguard.models.remediation_action import RemediationAction
+from cloudguard.services.audit_service import create_audit_log
 
 
 def request_remediation(
@@ -36,6 +37,17 @@ def request_remediation(
         )
 
         db.add(remediation)
+
+        create_audit_log(
+            db,
+            event_type="remediation_requested",
+            entity_type="finding",
+            entity_id=finding.id,
+            actor=requested_by,
+            action="request_remediation",
+            details="High-risk remediation is awaiting approval",
+        )
+
         db.commit()
         db.refresh(remediation)
 
@@ -57,6 +69,16 @@ def request_remediation(
         finding.status = "closed"
 
         db.add(remediation)
+        create_audit_log(
+            db,
+            event_type="remediation_completed",
+            entity_type="finding",
+            entity_id=finding.id,
+            actor=requested_by,
+            action="add_missing_tag",
+            details="Low-risk missing-tag remediation completed",
+        )
+
         db.commit()
         db.refresh(remediation)
 
@@ -101,7 +123,16 @@ def approve_remediation(
     )
 
     finding.status = "closed"
-
+    create_audit_log(
+        db,
+        event_type="remediation_approved",
+        entity_type="finding",
+        entity_id=finding.id,
+        actor=approved_by,
+        action="approve_remediation",
+        details="High-risk remediation approved and completed",
+    )
+    
     db.commit()
     db.refresh(remediation)
 

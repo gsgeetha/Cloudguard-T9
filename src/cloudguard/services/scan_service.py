@@ -10,6 +10,7 @@ from cloudguard.models.scan import Scan
 from cloudguard.models.subscription import Subscription
 from cloudguard.policies.required_tag import evaluate_required_tag
 from cloudguard.policies.risky_nsg import evaluate_risky_nsg
+from cloudguard.services.audit_service import create_audit_log
 
 
 def run_scan(
@@ -32,6 +33,17 @@ def run_scan(
     db.commit()
     db.refresh(scan)
 
+    create_audit_log(
+        db,
+        event_type="scan_started",
+        entity_type="scan",
+        entity_id=scan.id,
+        actor="system",
+        action="run_scan",
+        details=f"Compliance scan started for subscription {subscription.id}",
+    )
+
+    db.commit()
     try:
         resources = load_mock_resources()
 
@@ -55,8 +67,35 @@ def run_scan(
                     if violation is None:
                         continue
 
-                    db.add(
-                        Finding(
+                    finding = Finding(
+                        scan_id=scan.id,
+                        policy_rule_id=policy.id,
+                        resource_id=violation.resource_id,
+                        resource_name=violation.resource_name,
+                        resource_type=violation.resource_type,
+                        severity=policy.severity,
+                        status="open",
+                        message=violation.message,
+                    )
+                    db.add(finding)
+                    db.flush()
+
+                    create_audit_log(
+                        db,
+                        event_type="finding_created",
+                        entity_type="finding",
+                        entity_id=finding.id,
+                        actor="system",
+                        action="create_finding",
+                        details=finding.message,
+                    )
+
+            elif policy.rule_type == "risky_nsg":
+                for resource in resources:
+                    violations = evaluate_risky_nsg(resource)
+
+                    for violation in violations:
+                        finding = Finding(
                             scan_id=scan.id,
                             policy_rule_id=policy.id,
                             resource_id=violation.resource_id,
@@ -66,28 +105,32 @@ def run_scan(
                             status="open",
                             message=violation.message,
                         )
-                    )
 
-            elif policy.rule_type == "risky_nsg":
-                for resource in resources:
-                    violations = evaluate_risky_nsg(resource)
+                        db.add(finding)
+                        db.flush()
 
-                    for violation in violations:
-                        db.add(
-                            Finding(
-                                scan_id=scan.id,
-                                policy_rule_id=policy.id,
-                                resource_id=violation.resource_id,
-                                resource_name=violation.resource_name,
-                                resource_type=violation.resource_type,
-                                severity=policy.severity,
-                                status="open",
-                                message=violation.message,
-                            )
+                        create_audit_log(
+                            db,
+                            event_type="finding_created",
+                            entity_type="finding",
+                            entity_id=finding.id,
+                            actor="system",
+                            action="create_finding",
+                            details=finding.message,
                         )
 
         scan.status = "completed"
         scan.completed_at = datetime.utcnow()
+
+        create_audit_log(
+            db,
+            event_type="scan_completed",
+            entity_type="scan",
+            entity_id=scan.id,
+            actor="system",
+            action="complete_scan",
+            details="Compliance scan completed successfully",
+        )
 
         db.commit()
         db.refresh(scan)
@@ -103,6 +146,15 @@ def run_scan(
         if scan is not None:
             scan.status = "failed"
             scan.completed_at = datetime.utcnow()
+            create_audit_log(
+                db,
+                event_type="scan_failed",
+                entity_type="scan",
+                entity_id=scan.id,
+                actor="system",
+                action="fail_scan",
+                details="Compliance scan failed",
+            )
             db.commit()
 
         raise
