@@ -3,7 +3,8 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from cloudguard.azure.mock_inventory import load_mock_resources
+from cloudguard.azure.inventory import InventoryProvider
+from cloudguard.azure.mock_inventory import MockInventoryProvider
 from cloudguard.models.finding import Finding
 from cloudguard.models.policy_rule import PolicyRule
 from cloudguard.models.scan import Scan
@@ -17,7 +18,10 @@ def run_scan(
     db: Session,
     subscription_db_id: int,
     actor: str,
+    inventory_provider: InventoryProvider | None = None,
 ) -> Scan:
+    if inventory_provider is None:
+        inventory_provider = MockInventoryProvider()
     subscription = db.get(Subscription, subscription_db_id)
 
     if subscription is None:
@@ -46,7 +50,7 @@ def run_scan(
 
     db.commit()
     try:
-        resources = load_mock_resources()
+        resources = inventory_provider.list_resources()
 
         policies = list(
             db.scalars(

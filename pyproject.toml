@@ -26,6 +26,9 @@ dependencies = [
     "azure-keyvault-secrets"
 ]
 
+[project.scripts]
+cloudguard = "cloudguard.cli:app"
+
 [project.optional-dependencies]
 dev = [
     "pytest",
