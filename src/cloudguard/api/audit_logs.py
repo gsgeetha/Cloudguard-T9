@@ -5,6 +5,8 @@ from sqlalchemy.orm import Session
 from cloudguard.core.database import get_db
 from cloudguard.models.audit_log import AuditLog
 from cloudguard.schemas.audit_log import AuditLogResponse
+from cloudguard.core.auth import require_role
+from cloudguard.models.user import User
 
 
 router = APIRouter(
@@ -23,6 +25,12 @@ def list_audit_logs(
     entity_id: int | None = Query(default=None),
     actor: str | None = Query(default=None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role(
+            "admin",
+            "security_officer",
+        )
+    ),
 ) -> list[AuditLog]:
     statement = select(AuditLog)
 

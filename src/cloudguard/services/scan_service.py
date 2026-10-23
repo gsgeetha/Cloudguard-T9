@@ -16,6 +16,7 @@ from cloudguard.services.audit_service import create_audit_log
 def run_scan(
     db: Session,
     subscription_db_id: int,
+    actor: str,
 ) -> Scan:
     subscription = db.get(Subscription, subscription_db_id)
 
@@ -38,7 +39,7 @@ def run_scan(
         event_type="scan_started",
         entity_type="scan",
         entity_id=scan.id,
-        actor="system",
+        actor=actor,
         action="run_scan",
         details=f"Compliance scan started for subscription {subscription.id}",
     )
@@ -114,7 +115,7 @@ def run_scan(
                             event_type="finding_created",
                             entity_type="finding",
                             entity_id=finding.id,
-                            actor="system",
+                            actor=actor,
                             action="create_finding",
                             details=finding.message,
                         )
@@ -127,7 +128,7 @@ def run_scan(
             event_type="scan_completed",
             entity_type="scan",
             entity_id=scan.id,
-            actor="system",
+            actor=actor,
             action="complete_scan",
             details="Compliance scan completed successfully",
         )
@@ -151,7 +152,7 @@ def run_scan(
                 event_type="scan_failed",
                 entity_type="scan",
                 entity_id=scan.id,
-                actor="system",
+                actor=actor,
                 action="fail_scan",
                 details="Compliance scan failed",
             )

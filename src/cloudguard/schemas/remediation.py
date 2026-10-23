@@ -2,11 +2,6 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-
-class RemediationRequest(BaseModel):
-    requested_by: str
-
-
 class RemediationResponse(BaseModel):
     id: int
     finding_id: int
@@ -20,6 +15,3 @@ class RemediationResponse(BaseModel):
     completed_at: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
-
-class ApprovalRequest(BaseModel):
-    approved_by: str

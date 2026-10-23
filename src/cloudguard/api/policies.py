@@ -9,6 +9,8 @@ from cloudguard.schemas.policy_rule import (
     PolicyRuleResponse,
 )
 from cloudguard.services.audit_service import create_audit_log
+from cloudguard.core.auth import require_role
+from cloudguard.models.user import User
 
 router = APIRouter(
     prefix="/api/v1/policies",
@@ -24,6 +26,9 @@ router = APIRouter(
 def create_policy(
     policy: PolicyRuleCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role("admin")
+    ),
 ) -> PolicyRule:
     existing_policy = db.scalar(
         select(PolicyRule).where(PolicyRule.name == policy.name)
@@ -45,7 +50,7 @@ def create_policy(
         event_type="policy_created",
         entity_type="policy",
         entity_id=db_policy.id,
-        actor="system",
+        actor=current_user.username,
         action="create_policy",
         details=f"Policy '{db_policy.name}' created",
     )
@@ -62,5 +67,12 @@ def create_policy(
 )
 def list_policies(
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role(
+            "admin",
+            "cloud_engineer",
+            "security_officer",
+        )
+    ),
 ) -> list[PolicyRule]:
     return list(db.scalars(select(PolicyRule)).all())

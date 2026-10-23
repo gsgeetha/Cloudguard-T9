@@ -5,16 +5,13 @@ from sqlalchemy.orm import Session
 from cloudguard.core.database import get_db
 from cloudguard.models.finding import Finding
 from cloudguard.schemas.finding import FindingResponse
-from cloudguard.schemas.remediation import (
-    ApprovalRequest,
-    RemediationRequest,
-    RemediationResponse,
-)
-
+from cloudguard.schemas.remediation import RemediationResponse
 from cloudguard.services.remediation_service import (
     approve_remediation,
     request_remediation,
 )
+from cloudguard.core.auth import require_role
+from cloudguard.models.user import User
 router = APIRouter(
     prefix="/api/v1/findings",
     tags=["Findings"],
@@ -30,6 +27,13 @@ def list_findings(
     finding_status: str | None = Query(default=None, alias="status"),
     scan_id: int | None = Query(default=None),
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role(
+            "admin",
+            "cloud_engineer",
+            "security_officer",
+        )
+    ),
 ) -> list[Finding]:
     statement = select(Finding)
 
@@ -54,6 +58,13 @@ def list_findings(
 def get_finding(
     finding_id: int,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role(
+            "admin",
+            "cloud_engineer",
+            "security_officer",
+        )
+    ),
 ) -> Finding:
     finding = db.get(Finding, finding_id)
 
@@ -71,14 +82,19 @@ def get_finding(
 )
 def remediate_finding(
     finding_id: int,
-    request: RemediationRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role(
+            "admin",
+            "cloud_engineer",
+        )
+    ),
 ):
     try:
         return request_remediation(
             db=db,
             finding_id=finding_id,
-            requested_by=request.requested_by,
+            requested_by=current_user.username,
         )
 
     except ValueError as error:
@@ -93,14 +109,16 @@ def remediate_finding(
 )
 def approve_finding_remediation(
     finding_id: int,
-    request: ApprovalRequest,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role("security_officer")
+    ),
 ):
     try:
         return approve_remediation(
             db=db,
             finding_id=finding_id,
-            approved_by=request.approved_by,
+            approved_by=current_user.username,
         )
 
     except ValueError as error:

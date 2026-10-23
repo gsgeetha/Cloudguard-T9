@@ -4,6 +4,7 @@ from cloudguard.models.scan import Scan
 from cloudguard.models.subscription import Subscription
 from cloudguard.models.remediation_action import RemediationAction
 from cloudguard.models.audit_log import AuditLog
+from cloudguard.models.user import User
 
 __all__ = [
     "AuditLog",
@@ -12,4 +13,5 @@ __all__ = [
     "RemediationAction",
     "Scan",
     "Subscription",
+    "User",
 ]

@@ -5,6 +5,7 @@ from cloudguard.api.policies import router as policies_router
 from cloudguard.api.scans import router as scans_router
 from cloudguard.api.findings import router as findings_router
 from cloudguard.api.audit_logs import router as audit_logs_router
+from cloudguard.api.auth import router as auth_router
 
 app = FastAPI(
     title="CloudGuard API",
@@ -12,6 +13,7 @@ app = FastAPI(
     version="0.1.0",
 )
 
+app.include_router(auth_router)
 app.include_router(subscriptions_router)
 app.include_router(policies_router)
 app.include_router(scans_router)

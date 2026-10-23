@@ -18,7 +18,7 @@ dependencies = [
     "typer",
     "httpx",
     "python-jose[cryptography]",
-    "passlib[bcrypt]",
+    "bcrypt",
     "azure-identity",
     "azure-mgmt-resource",
     "azure-mgmt-network",

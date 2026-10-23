@@ -7,6 +7,8 @@ from cloudguard.schemas.subscription import (
     SubscriptionCreate,
     SubscriptionResponse,
 )
+from cloudguard.core.auth import require_role
+from cloudguard.models.user import User
 
 router = APIRouter(
     prefix="/api/v1/subscriptions",
@@ -18,6 +20,9 @@ router = APIRouter(
 def create_subscription(
     subscription: SubscriptionCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role("admin")
+    ),
 ):
     db_subscription = Subscription(
         subscription_id=subscription.subscription_id,
@@ -35,5 +40,12 @@ def create_subscription(
 @router.get("", response_model=list[SubscriptionResponse])
 def list_subscriptions(
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role(
+            "admin",
+            "cloud_engineer",
+            "security_officer",
+        )
+    ),
 ):
     return db.query(Subscription).all()

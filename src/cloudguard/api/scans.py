@@ -6,6 +6,8 @@ from cloudguard.core.database import get_db
 from cloudguard.models.scan import Scan
 from cloudguard.schemas.scan import ScanCreate, ScanResponse
 from cloudguard.services.scan_service import run_scan
+from cloudguard.core.auth import require_role
+from cloudguard.models.user import User
 
 router = APIRouter(
     prefix="/api/v1/scans",
@@ -21,11 +23,18 @@ router = APIRouter(
 def create_scan(
     scan_request: ScanCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(
+        require_role(
+            "admin",
+            "cloud_engineer",
+        )
+    ),
 ) -> Scan:
     try:
         return run_scan(
             db=db,
             subscription_db_id=scan_request.subscription_id,
+            actor=current_user.username,
         )
     except ValueError as error:
         raise HTTPException(
